@@ -4,13 +4,66 @@
       <img class="theodo-logo" alt="Theodo logo" src="./assets/theodo-logo.png">
       <img class="vue-logo" alt="Vue logo" src="./assets/vue-logo.png">
     </div>
+    <grid :rows-count="rowsCount" :columns-count="columnsCount" :alive-cells-map="aliveCellsMap" :toggle-cell-state-callback="toggleCellState"></grid>
+    <div class="buttons-container">
+      <button @click="randomizeMap()">Random</button>
+      <button @click="updateAliveCellsMap()">Next Map</button>
+      <button @click="clearMap()">Clear</button>
+      <button @click="launch()">Launch</button>
+    </div>
   </div>
 </template>
 
 <script>
+import Grid from './components/Grid.vue'
+import { getRandomizedMap } from './services/grid-helper.js'
+import { getNextMap } from './services/conway-rules.js'
+
+const initialRowCount = 30;
 
 export default {
-  name: 'GameOfLife'
+  name: 'GameOfLife',
+  components: {
+		Grid
+  },
+  data: function () {
+    return {
+      rowsCount: initialRowCount,
+      aliveCellsMap: {
+        R24C55: true,
+        R12C24: true,
+        R22C18: true,
+        R7C25: true,
+        R11C76: true,
+      }
+    }
+  },
+  computed: {
+    columnsCount : function() {
+        return 3* this.rowsCount
+    }
+  },
+  methods: {
+    randomizeMap: function () {
+      this.aliveCellsMap = getRandomizedMap(this.rowsCount, this.columnsCount)
+    },
+    toggleCellState: function (cellId) {
+      const newAliveCellsMap = { ...this.aliveCellsMap }
+
+      newAliveCellsMap[cellId] = !newAliveCellsMap[cellId]
+
+      this.aliveCellsMap = newAliveCellsMap
+    },
+    updateAliveCellsMap: function (){
+        this.aliveCellsMap = getNextMap(this.rowsCount, this.columnsCount, this.aliveCellsMap);
+    },
+    clearMap: function () {
+        this.aliveCellsMap = {};
+    },
+    launch: function () {
+        setInterval(this.updateAliveCellsMap, 100);
+    }
+  }
 }
 </script>
 
@@ -29,5 +82,11 @@ export default {
 }
 .logos-container img + img {
   margin-left: 5px;
+}
+.buttons-container {
+  margin: 10px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  background-color: rgba(220, 220, 220, 0.5);
 }
 </style>

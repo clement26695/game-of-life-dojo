@@ -9,7 +9,8 @@
       <button @click="randomizeMap()">Random</button>
       <button @click="updateAliveCellsMap()">Next Map</button>
       <button @click="clearMap()">Clear</button>
-      <button @click="launch()">Launch</button>
+      <button v-if="pause" @click="launch()">Launch</button>
+      <button v-if="!pause" @click="launch()">Pause</button>
     </div>
   </div>
 </template>
@@ -35,7 +36,8 @@ export default {
         R22C18: true,
         R7C25: true,
         R11C76: true,
-      }
+      },
+      pause: true
     }
   },
   computed: {
@@ -61,8 +63,16 @@ export default {
         this.aliveCellsMap = {};
     },
     launch: function () {
-        setInterval(this.updateAliveCellsMap, 100);
+        this.pause = !this.pause;
     }
+  },
+  created: function () {
+    this.randomizeMap();
+    setInterval(function() {
+      if (!this.pause) {
+          this.updateAliveCellsMap();
+      }
+    }.bind(this), 100);
   }
 }
 </script>
